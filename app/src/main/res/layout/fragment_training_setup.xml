@@ -6,70 +6,75 @@
     android:layout_height="match_parent"
     tools:context=".TrainingSetupFragment">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#C5FFC8">
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
-        <TableLayout
-            android:id="@+id/tableLayout"
-            android:layout_width="316dp"
-            android:layout_height="235dp"
-            android:layout_marginStart="60dp"
-            android:layout_marginTop="200dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="0dp"
+            android:orientation="horizontal">
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="321dp">
+            <RadioButton
+                android:id="@+id/btn_tiempo"
+                android:layout_width="205dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="por Tiempo" />
 
-                <TextView
-                    android:id="@+id/textView6"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Tiempo en minutos" />
+            <RadioButton
+                android:id="@+id/btn_metros"
+                android:layout_width="205dp"
+                android:layout_height="wrap_content"
+                android:text="por Metros" />
 
-                <EditText
-                    android:id="@+id/editTextNumber"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="number" />
-            </TableRow>
+        </RadioGroup>
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/tvEntrenamiento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ingresar tiempo (en Minutos)" />
 
-                <TextView
-                    android:id="@+id/textView5"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Intensidad" />
+        <EditText
+            android:id="@+id/et_parametro_Entrenamiento"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Ingresar un Numero"
+            android:importantForAutofill="no"
+            android:inputType="number"
+            android:textColorHint="#2E7D32"
+            tools:ignore="TouchTargetSizeCheck,VisualLintBounds" />
 
-                <EditText
-                    android:id="@+id/editTextText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="text"
-                    android:text="Name" />
-            </TableRow>
+        <TextView
+            android:id="@+id/tvIntensidad"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Intensidad" />
 
-        </TableLayout>
-
-        <Button
-            android:id="@+id/button2"
+        <Spinner
+            android:id="@+id/spinner_Intensidad"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="56dp"
-            android:layout_marginTop="120dp"
-            android:text="Comenzar entrenamiento"
-            android:textSize="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tableLayout" />
+            android:minHeight="80dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <Button
+            android:id="@+id/btn_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginEnd="35dp"
+            android:layout_marginBottom="96dp"
+            android:gravity="center_horizontal"
+            android:text="Comenzar entrenamiento"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+    </LinearLayout>
 
 </FrameLayout>
