@@ -1,6 +1,8 @@
 package com.example.bicismart;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -20,12 +22,13 @@ public class PreTrainingActivity extends AppCompatActivity {
 
     private TabLayout tabLayout;
     private ViewPager2 viewPager2;
+    private String address = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_pre_training);
+        setContentView(R.layout.tr_activity_pre_training);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -35,6 +38,8 @@ public class PreTrainingActivity extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         viewPager2 = findViewById(R.id.viewPager2);
 
+        Bundle bundle =getIntent().getExtras();
+        address = bundle.getString("Direccion_Bluethoot");
 
         viewPager2.setAdapter(new AdaptadorFragment(getSupportFragmentManager(), getLifecycle()));
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -79,7 +84,7 @@ public class PreTrainingActivity extends AppCompatActivity {
             Fragment fragment;
             switch (position){
                 case 0:
-                    fragment = new TrainingSetupFragment();
+                    fragment = TrainingSetupFragment.newInstance(address);
                     break;
                 case 1:
                     fragment = new MediaSetupFragment();
@@ -96,4 +101,9 @@ public class PreTrainingActivity extends AppCompatActivity {
             return 2;
         }
     }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
 }
+

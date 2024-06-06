@@ -1,10 +1,13 @@
 package com.example.bicismart;
 
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,53 +20,33 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link TrainingSetupFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class TrainingSetupFragment extends Fragment {
 
     private RadioButton btnTime, btnMeters;
-    private TextView tvTrainningParameter, tvItensity;
+    private TextView tvTrainningParameter;
     private EditText etTrainningParameter;
     private Spinner spItensity;
     private Button btnStart;
-    private String[] intensidades = new String[]
+    private final String[] intensidades = new String[]
             {
                     "Baja",
                     "Media",
                     "Alta",
             };
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private static String address = null;
+    private boolean enableBuzzer = true;
+    private boolean enableSensor = true;
+    private boolean enableDinMusic = true;
 
     public TrainingSetupFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TrainingSetupFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TrainingSetupFragment newInstance(String param1, String param2) {
+    public static TrainingSetupFragment newInstance(String address) {
         TrainingSetupFragment fragment = new TrainingSetupFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
+        Bundle bundle = new Bundle();
+        bundle.putString("Direccion_Bluetooth", address);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -71,16 +54,25 @@ public class TrainingSetupFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            address = getArguments().getString("Direccion_Bluetooth");
         }
+
+        getParentFragmentManager().setFragmentResultListener("datos", this, new FragmentResultListener()
+        {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                enableBuzzer = result.getBoolean("Buzzer");
+                enableSensor = result.getBoolean("Control_Sensors");
+                enableDinMusic = result.getBoolean("Musica_Dinamica");
+            }
+        });
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_training_setup, container, false);
+        return inflater.inflate(R.layout.tr_fragment_training_setup, container, false);
     }
 
     @Override
@@ -89,14 +81,19 @@ public class TrainingSetupFragment extends Fragment {
         btnTime = view.findViewById(R.id.btn_tiempo);
         btnMeters = view.findViewById(R.id.btn_metros);
         tvTrainningParameter = view.findViewById(R.id.tvEntrenamiento);
-        tvItensity = view.findViewById(R.id.tvIntensidad);
         etTrainningParameter = view.findViewById(R.id.et_parametro_Entrenamiento);
         btnStart = view.findViewById(R.id.btn_start);
         spItensity = view.findViewById(R.id.spinner_Intensidad);
 
         ArrayAdapter<String> adaptador = new ArrayAdapter<>(requireActivity().getApplicationContext(), android.R.layout.simple_spinner_item, intensidades);
         spItensity.setAdapter(adaptador);
+
+        Bundle args = getArguments();
+        address = args.getString("Direccion_Bluetooth", address);
+        showToast("Adress: " + address);
+
         btnTime.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
                 tvTrainningParameter.setText("Ingresar Tiempo (en Minutos)");
@@ -104,6 +101,7 @@ public class TrainingSetupFragment extends Fragment {
         });
 
         btnMeters.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
                 tvTrainningParameter.setText("Ingresar Metros");
@@ -116,10 +114,22 @@ public class TrainingSetupFragment extends Fragment {
                 String str = etTrainningParameter.getText().toString();
                 if(str.isEmpty())
                     showToast("Ingresar Parametros");
-                else
-                    showToast("Parametros: Duracion(Metros o Minutos): " +
-                        str + "\nIntensidad: " +
-                        spItensity.getSelectedItem().toString());
+                else{
+                    showToast("Parametros: Duracion(Metros o Minutos): " + str +
+                            "\nIntensidad: " + spItensity.getSelectedItem().toString() +
+                            "\nBuzzer: " + enableBuzzer +
+                            "\nSensores: " + enableSensor +
+                            "\nMusica Dinamica: " + enableDinMusic);
+
+                    Intent i = new Intent(getActivity(), TrainningActivity.class);
+                    i.putExtra("Direccion_Bluethoot", address);
+                    i.putExtra("Duracion", Integer.parseInt(str));
+                    i.putExtra("Intensidad", spItensity.getSelectedItem().toString());
+                    i.putExtra("Buzzer", enableBuzzer);
+                    i.putExtra("Sensores", enableSensor);
+                    i.putExtra("Musica Dinamica", enableDinMusic);
+                    startActivity(i);
+                }
             }
         });
 

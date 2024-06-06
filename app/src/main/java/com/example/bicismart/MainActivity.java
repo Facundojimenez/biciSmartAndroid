@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToPreTrainingScreen(View view){
         System.out.println("PRueba de clcikkkkkkkkkkkkk");
-        Intent intent = new Intent(this, PreTrainingActivity.class);
+        Intent intent = new Intent(this, BluetoothActivity.class);
         startActivity(intent);
     }
 }

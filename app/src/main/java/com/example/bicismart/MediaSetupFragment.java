@@ -68,7 +68,7 @@ public class MediaSetupFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_media_setup, container, false);
+        return inflater.inflate(R.layout.tr_fragment_media_setup, container, false);
     }
 
     @Override
@@ -78,6 +78,7 @@ public class MediaSetupFragment extends Fragment {
         swSensor = view.findViewById(R.id.switch_sensor);
         swBuzzer = view.findViewById(R.id.switch_buzzer);
         btnSave = view.findViewById(R.id.btn_save);
+
 
         swMusic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -105,8 +106,15 @@ public class MediaSetupFragment extends Fragment {
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v)
+            {
+
                 showToast("Guardando Configuracion");
+                Bundle bundle = new Bundle();
+                bundle.putBoolean("Musica_Dinamica", swMusic.isChecked());
+                bundle.putBoolean("Buzzer", swBuzzer.isChecked());
+                bundle.putBoolean("Control_Sensors", swSensor.isChecked());
+                getParentFragmentManager().setFragmentResult("datos", bundle);
             }
         });
     }
