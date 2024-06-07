@@ -1,19 +1,15 @@
 package com.example.bicismart;
 
-import java.util.List;
-
-
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.BaseAdapter;
-import android.widget.Button;
 import android.widget.TextView;
+
+import java.util.List;
 
 /**
  * Device list adapter.
@@ -23,7 +19,7 @@ import android.widget.TextView;
  */
 public class DeviceListAdapter extends BaseAdapter
 {
-    private LayoutInflater mInflater;
+    private final LayoutInflater mInflater;
     private List<BluetoothDevice> mData;
     private OnPairButtonClickListener mListener;
 
@@ -46,7 +42,7 @@ public class DeviceListAdapter extends BaseAdapter
         return position;
     }
 
-    @SuppressLint("MissingPermission")
+    @SuppressLint({"MissingPermission", "InflateParams"})
     public View getView(final int position, View convertView, ViewGroup parent)
     {
         ViewHolder holder;
@@ -95,6 +91,6 @@ public class DeviceListAdapter extends BaseAdapter
 
     public interface OnPairButtonClickListener
     {
-        public abstract void onPairButtonClick(int position);
+        void onPairButtonClick(int position);
     }
 }

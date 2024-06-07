@@ -22,11 +22,11 @@ import android.widget.Toast;
 
 public class TrainingSetupFragment extends Fragment {
 
-    private RadioButton btnTime, btnMeters;
+    RadioButton btnTime, btnMeters;
     private TextView tvTrainningParameter;
     private EditText etTrainningParameter;
     private Spinner spItensity;
-    private Button btnStart;
+    Button btnStart;
     private final String[] intensidades = new String[]
             {
                     "Baja",
@@ -119,11 +119,13 @@ public class TrainingSetupFragment extends Fragment {
                             "\nIntensidad: " + spItensity.getSelectedItem().toString() +
                             "\nBuzzer: " + enableBuzzer +
                             "\nSensores: " + enableSensor +
-                            "\nMusica Dinamica: " + enableDinMusic);
+                            "\nMusica Dinamica: " + enableDinMusic +
+                            "\nPor Tiempo: " + btnTime.isChecked());
 
                     Intent i = new Intent(getActivity(), TrainningActivity.class);
                     i.putExtra("Direccion_Bluethoot", address);
                     i.putExtra("Duracion", Integer.parseInt(str));
+                    i.putExtra("Por Tiempo", btnTime.isChecked());
                     i.putExtra("Intensidad", spItensity.getSelectedItem().toString());
                     i.putExtra("Buzzer", enableBuzzer);
                     i.putExtra("Sensores", enableSensor);

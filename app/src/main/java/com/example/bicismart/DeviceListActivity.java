@@ -23,7 +23,7 @@ import android.widget.Toast;
 
 public class DeviceListActivity extends Activity
 {
-    private ListView mListView;
+    ListView mListView;
     private DeviceListAdapter mAdapter;
     private ArrayList<BluetoothDevice> mDeviceList;
     private int posicionListBluethoot;
@@ -79,7 +79,7 @@ public class DeviceListActivity extends Activity
         }
     }
 
-    private DeviceListAdapter.OnPairButtonClickListener listenerBotonEmparejar = new DeviceListAdapter.OnPairButtonClickListener()
+    private final DeviceListAdapter.OnPairButtonClickListener listenerBotonEmparejar = new DeviceListAdapter.OnPairButtonClickListener()
     {
         @SuppressLint("MissingPermission")
         @Override

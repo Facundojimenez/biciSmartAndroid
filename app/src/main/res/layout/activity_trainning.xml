@@ -9,6 +9,12 @@
     tools:context=".TrainningActivity">
 
     <TextView
+        android:id="@+id/tv_tipoEntrenamiento"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Por tiempo" />
+
+    <TextView
         android:id="@+id/tvAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,5 +49,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Musica Dinamica" />
+
+    <TextView
+        android:id="@+id/tv_estado"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Estado del entrenamiento"
+        android:textAlignment="center"
+        android:textSize="50sp" />
 
 </LinearLayout>
