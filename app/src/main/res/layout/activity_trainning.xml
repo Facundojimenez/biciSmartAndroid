@@ -5,6 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:onClick="restartTrainning"
     android:orientation="vertical"
     tools:context=".TrainningActivity">
 
@@ -53,9 +54,15 @@
     <TextView
         android:id="@+id/tv_estado"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="Estado del entrenamiento"
         android:textAlignment="center"
         android:textSize="50sp" />
+
+    <Button
+        android:id="@+id/btn_restart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reiniciar" />
 
 </LinearLayout>
