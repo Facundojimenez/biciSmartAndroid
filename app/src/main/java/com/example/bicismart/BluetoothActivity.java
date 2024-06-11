@@ -32,10 +32,6 @@ import android.bluetooth.BluetoothDevice;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-/*********************************************************************************************************
- * Activity Principal de la App. Es la primiera activity que se ejecuta cuando el usuario ingresa a la App
- **********************************************************************************************************/
-
 public class BluetoothActivity extends Activity
 {
     private TextView txtEstado;
@@ -49,6 +45,7 @@ public class BluetoothActivity extends Activity
     BluetoothManager bluetoothManager;
 
     public static final int MULTIPLE_PERMISSIONS = 10;
+
     @SuppressLint("InlinedApi")
     String[] permissions= new String[]
             {
@@ -57,7 +54,6 @@ public class BluetoothActivity extends Activity
                     Manifest.permission.ACCESS_COARSE_LOCATION,
                     Manifest.permission.ACCESS_FINE_LOCATION,
             };
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -188,9 +184,11 @@ public class BluetoothActivity extends Activity
             else if (BluetoothDevice.ACTION_FOUND.equals(action))
             {
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                mDeviceList.add(device);
+                if(!(mDeviceList.contains(device)))
+                    mDeviceList.add(device);
 
-                if (device != null) {
+                if (device != null)
+                {
                     showToast("Dispositivo Encontrado:" + device.getName());
                 }
             }
@@ -224,6 +222,7 @@ public class BluetoothActivity extends Activity
         if(!isLocationEnabled(this))
         {
             showToast("Se necesita activar la Ubicacion para Buscar Dispositivos");
+            return ;
         }
         showToast("Buscando Dispositivos");
         mBluetoothAdapter.startDiscovery();

@@ -1,13 +1,8 @@
 package com.example.bicismart;
 
 import android.annotation.SuppressLint;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,46 +21,40 @@ import androidx.core.view.WindowInsetsCompat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.UUID;
 
-public class TrainningActivity extends AppCompatActivity {
-    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento,
-            tvEstado;
+public class TrainningActivity extends AppCompatActivity
+{
+    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento,tvEstado;
     int duracion;
     String intensidad;
     boolean enableBuzzer, enableSensor, enableMusDin, forTime;
-
     Button btnRestart;
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     Handler bluetoothIn;
     final int handlerState = 0; //used to identify handler message
-    private BluetoothAdapter btAdapter = null;
-    private BluetoothSocket btSocket = null;
-    BluetoothManager bluetoothManager;
+    private SingletonSocket mSocket;
+
     private final StringBuilder recDataString = new StringBuilder();
 
     private ConnectedThread mConnectedThread;
 
-    // SPP UUID service  - Funciona en la mayoria de los dispositivos
-    private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     // String for MAC address del Hc05
     private static String address = null;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-
     @SuppressLint({"SetTextI18n", "MissingPermission"})
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_trainning);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) ->
+        {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         tvDuracion = findViewById(R.id.tv_duracion);
         tvIntensidad = findViewById(R.id.tv_intensidad);
         tvBuzzer = findViewById(R.id.tv_buzzer);
@@ -75,7 +64,6 @@ public class TrainningActivity extends AppCompatActivity {
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
         tvEstado = findViewById(R.id.tv_estado);
         btnRestart = findViewById(R.id.btn_restart);
-
 
         Bundle bundle =getIntent().getExtras();
         address = bundle.getString("Direccion_Bluethoot");
@@ -94,67 +82,24 @@ public class TrainningActivity extends AppCompatActivity {
         tvMusDin.setText("Musica Dinamica: " + enableMusDin);
         tvAddress.setText("Address: " + address);
 
-        btnRestart.setOnClickListener(new View.OnClickListener() {
-                                          @Override
-                                          public void onClick(View v) {
-                                              Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
-                                              intent.putExtra("Direccion_Bluethoot", address);
-                                              startActivity(intent);
-                                          }
-                                      });
-        ////////////////////////////////////////////////////////////////////////////////////////////
+        btnRestart.setOnClickListener(new View.OnClickListener()
+        {
+          @Override
+          public void onClick(View v)
+          {
+              Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
+              intent.putExtra("Direccion_Bluethoot", address);
+              startActivity(intent);
+          }
+        });
 
-        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        if (Build.VERSION.SDK_INT >= 31)
-        {
-            btAdapter = bluetoothManager.getAdapter();
-        } else
-        {
-            btAdapter = BluetoothAdapter.getDefaultAdapter();
-        }
+        mSocket = SingletonSocket.getInstance("", null);
 
         //defino el Handler de comunicacion entre el hilo Principal  el secundario.
         //El hilo secundario va a mostrar informacion al layout atraves utilizando indeirectamente a este handler
         bluetoothIn = Handler_Msg_Hilo_Principal();
 
-         /*
-        //Obtengo el parametro, aplicando un Bundle, que me indica la Mac Adress del HC05
-        Intent intent=getIntent();
-        Bundle extras=intent.getExtras();
-        address= extras.getString("Direccion_Bluethoot");
-        */
-
-        BluetoothDevice device = btAdapter.getRemoteDevice(address);
-
-        //se realiza la conexion del Bluethoot crea y se conectandose a atraves de un socket
-        try
-        {
-            btSocket = createBluetoothSocket(device);
-        }
-        catch (IOException e)
-        {
-            showToast( "La creacción del Socket fallo");
-        }
-        // Establish the Bluetooth socket connection.
-        try
-        {
-            btSocket.connect();
-        }
-        catch (IOException e)
-        {
-            try
-            {
-                btSocket.close();
-            }
-            catch (IOException e2)
-            {
-                //insert code to deal with this
-            }
-        }
-
-        //Una establecida la conexion con el Hc05 se crea el hilo secundario, el cual va a recibir
-        // los datos de Arduino atraves del bluethoot
-        mConnectedThread = new ConnectedThread(btSocket);
+        mConnectedThread = new ConnectedThread(mSocket.getBtSocket());
         mConnectedThread.start();
 
         if(forTime)
@@ -167,103 +112,27 @@ public class TrainningActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-    }
-
     @SuppressLint("MissingPermission")
     @Override
     //Cada vez que se detecta el evento OnResume se establece la comunicacion con el HC05, creando un
     //socketBluethoot
-    protected void onResume() {
-        super.onResume();
-        /*
-        //Obtengo el parametro, aplicando un Bundle, que me indica la Mac Adress del HC05
-        Intent intent=getIntent();
-        Bundle extras=intent.getExtras();
-        address= extras.getString("Direccion_Bluethoot");
-        */
-
-        BluetoothDevice device = btAdapter.getRemoteDevice(address);
-
-        //se realiza la conexion del Bluethoot crea y se conectandose a atraves de un socket
-        try
-        {
-            btSocket = createBluetoothSocket(device);
-        }
-        catch (IOException e)
-        {
-            showToast( "La creacción del Socket fallo");
-        }
-        // Establish the Bluetooth socket connection.
-        try
-        {
-            btSocket.connect();
-        }
-        catch (IOException e)
-        {
-            try
-            {
-                btSocket.close();
-            }
-            catch (IOException e2)
-            {
-                //insert code to deal with this
-            }
-        }
-
-        //Una establecida la conexion con el Hc05 se crea el hilo secundario, el cual va a recibir
-        // los datos de Arduino atraves del bluethoot
-        mConnectedThread = new ConnectedThread(btSocket);
-        mConnectedThread.start();
-
-        //I send a character when resuming.beginning transmission to check device is connected
-        //If it is not an exception will be thrown in the write method and finish() will be called
-        //mConnectedThread.write("x");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        try
-        {
-            //Don't leave Bluetooth sockets open when leaving activity
-            btSocket.close();
-        } catch (IOException e2) {
-            //insert code to deal with this
-        }    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    //Cuando se ejecuta el evento onPause se cierra el socket Bluethoot, para no recibiendo datos
-    public void onPause()
+    protected void onResume()
     {
-        super.onPause();
-        try
-        {
-            //Don't leave Bluetooth sockets open when leaving activity
-            btSocket.close();
-        } catch (IOException e2) {
-            //insert code to deal with this
-        }
+        super.onResume();
+        mConnectedThread = new ConnectedThread(mSocket.getBtSocket());
+        mConnectedThread.start();
     }
 
-    //Metodo que crea el socket bluethoot
-    @SuppressLint("MissingPermission")
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
-
-        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
+    private void showToast(String message)
+    {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
     //Handler que sirve que permite mostrar datos en el Layout al hilo secundario
     private Handler Handler_Msg_Hilo_Principal ()
     {
-        return  new Handler(Looper.getMainLooper()) {
+        return  new Handler(Looper.getMainLooper())
+        {
             public void handleMessage(@NonNull android.os.Message msg)
             {
                 //si se recibio un msj del hilo secundario
@@ -334,7 +203,8 @@ public class TrainningActivity extends AppCompatActivity {
                     //se muestran en el layout de la activity, utilizando el handler del hilo
                     // principal antes mencionado
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
-                } catch (IOException e) {
+                } catch (IOException e)
+                {
                     break;
                 }
             }
@@ -342,11 +212,14 @@ public class TrainningActivity extends AppCompatActivity {
 
 
         //write method
-        public void write(String input) {
+        public void write(String input)
+        {
             byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
-            try {
+            try
+            {
                 mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
-            } catch (IOException e) {
+            } catch (IOException e)
+            {
                 //if you cannot write, close the application
                 showToast("La conexion fallo");
                 finish();

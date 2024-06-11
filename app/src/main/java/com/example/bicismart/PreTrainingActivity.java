@@ -1,5 +1,7 @@
 package com.example.bicismart;
 
+import android.bluetooth.BluetoothManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -17,18 +19,29 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.tabs.TabLayout;
 
-public class PreTrainingActivity extends AppCompatActivity {
-
+public class PreTrainingActivity extends AppCompatActivity
+{
     private TabLayout tabLayout;
     private ViewPager2 viewPager2;
     private String address = null;
 
+    BluetoothManager bluetoothManager;
+    private SingletonSocket mSocket;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onDestroy() {
+        super.onDestroy();
+        mSocket.close();
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.tr_activity_pre_training);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) ->
+        {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
@@ -40,46 +53,56 @@ public class PreTrainingActivity extends AppCompatActivity {
         Bundle bundle =getIntent().getExtras();
         address = bundle.getString("Direccion_Bluethoot");
 
+        bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mSocket = SingletonSocket.getInstance(address, bluetoothManager);
+
         viewPager2.setAdapter(new AdaptadorFragment(getSupportFragmentManager(), getLifecycle()));
-        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+        viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
+        {
             @Override
-            public void onPageSelected(int position) {
+            public void onPageSelected(int position)
+            {
                 System.out.println("me llamaron");
                 System.out.println(position);
                 tabLayout.selectTab(tabLayout.getTabAt(position));
             }
         });
 
-
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
+        {
             @Override
-            public void onTabSelected(TabLayout.Tab tab) {
+            public void onTabSelected(TabLayout.Tab tab)
+            {
                 viewPager2.setCurrentItem(tab.getPosition());
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
+            public void onTabUnselected(TabLayout.Tab tab)
+            {
 
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {
+            public void onTabReselected(TabLayout.Tab tab)
+            {
 
             }
         });
-
     }
 
 
-    class AdaptadorFragment extends FragmentStateAdapter{
 
-        public AdaptadorFragment(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle){
+    class AdaptadorFragment extends FragmentStateAdapter
+    {
+        public AdaptadorFragment(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle)
+        {
             super(fragmentManager, lifecycle);
         }
 
         @NonNull
         @Override
-        public Fragment createFragment(int position) {
+        public Fragment createFragment(int position)
+        {
             Fragment fragment;
             switch (position){
                 case 0:
@@ -101,7 +124,8 @@ public class PreTrainingActivity extends AppCompatActivity {
         }
     }
 
-    private void showToast(String message) {
+    private void showToast(String message)
+    {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

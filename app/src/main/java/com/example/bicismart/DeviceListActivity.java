@@ -17,10 +17,6 @@ import android.content.IntentFilter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-/*********************************************************************************************************
- * Activity que muestra el listado de los dispositivos bluethoot encontrados
- **********************************************************************************************************/
-
 public class DeviceListActivity extends Activity
 {
     ListView mListView;
@@ -67,7 +63,8 @@ public class DeviceListActivity extends Activity
         }
     }
 
-    private void unpairDevice(BluetoothDevice device) {
+    private void unpairDevice(BluetoothDevice device)
+    {
         try
         {
             Method method = device.getClass().getMethod("removeBond", (Class[]) null);
@@ -83,7 +80,8 @@ public class DeviceListActivity extends Activity
     {
         @SuppressLint("MissingPermission")
         @Override
-        public void onPairButtonClick(int position) {
+        public void onPairButtonClick(int position)
+        {
             BluetoothDevice device = mDeviceList.get(position);
             if (device.getBondState() == BluetoothDevice.BOND_BONDED)
             {
@@ -124,9 +122,9 @@ public class DeviceListActivity extends Activity
                     i.putExtra("Direccion_Bluethoot", direccionBluethoot);
                     startActivity(i);
                     finish();
-
                 }  //si se detrecto un desaemparejamiento
-                else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED) {
+                else if (state == BluetoothDevice.BOND_NONE && prevState == BluetoothDevice.BOND_BONDED)
+                {
                     showToast("No emparejado");
                 }
 
