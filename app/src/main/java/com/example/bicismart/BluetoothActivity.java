@@ -216,7 +216,7 @@ public class BluetoothActivity extends Activity
         }
     }
 
-    @SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission")
     public void btnBuscarListener (View v)
     {
         if(!isLocationEnabled(this))
