@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -110,6 +111,13 @@ public class TrainningActivity extends AppCompatActivity
         {
             mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0));
         }
+
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                //no hacer nada, desactivar back button
+            }
+        });
     }
 
     @SuppressLint("MissingPermission")

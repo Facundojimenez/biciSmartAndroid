@@ -2,11 +2,14 @@ package com.example.bicismart;
 
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -65,6 +68,27 @@ public class PreTrainingActivity extends AppCompatActivity
                 System.out.println("me llamaron");
                 System.out.println(position);
                 tabLayout.selectTab(tabLayout.getTabAt(position));
+            }
+        });
+
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(PreTrainingActivity.this);
+                builder.setMessage("¿Desea salir de la aplicación?");
+
+                builder.setPositiveButton("Si", (DialogInterface.OnClickListener) (dialog, which) -> {
+                    // cerrar app
+                    finishAffinity();
+
+                });
+
+                builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                    dialog.cancel();
+                });
+
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
         });
 
