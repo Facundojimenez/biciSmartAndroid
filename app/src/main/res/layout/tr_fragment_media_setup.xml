@@ -9,7 +9,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#D2FBFB"
         android:orientation="vertical">
 
         <TableLayout
@@ -27,7 +26,8 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cambiar música dinámica" />
+                    android:text="Cambiar música dinámica"
+                    android:textColor="?android:attr/textColorPrimary"/>
 
                 <Switch
                     android:id="@+id/switch_music"
@@ -47,7 +47,8 @@
                     android:id="@+id/textView3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Controlar entrenamiento con sensores" />
+                    android:text="Controlar entrenamiento con sensores"
+                    android:textColor="?android:attr/textColorPrimary"/>
 
                 <Switch
                     android:id="@+id/switch_sensor"
@@ -67,7 +68,8 @@
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Habilitar buzzer" />
+                    android:text="Habilitar buzzer"
+                    android:textColor="?android:attr/textColorPrimary"/>
 
                 <Switch
                     android:id="@+id/switch_buzzer"
