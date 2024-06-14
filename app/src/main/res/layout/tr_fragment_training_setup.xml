@@ -55,7 +55,8 @@
             android:id="@+id/tvIntensidad"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Intensidad" />
+            android:text="Intensidad"
+            android:textColor="?android:attr/textColorPrimary"/>
 
         <Spinner
             android:id="@+id/spinner_Intensidad"

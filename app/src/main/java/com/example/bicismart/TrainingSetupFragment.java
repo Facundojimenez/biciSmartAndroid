@@ -2,6 +2,7 @@ package com.example.bicismart;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.fragment.app.FragmentResultListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -97,10 +99,23 @@ public class TrainingSetupFragment extends Fragment
 
         ArrayAdapter<String> adaptador = new ArrayAdapter<>(requireActivity().getApplicationContext(), android.R.layout.simple_spinner_item, intensidades);
         spItensity.setAdapter(adaptador);
+        // esto es para cambiar el color del 1er item seleccionado
+        spItensity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                TextView ch = ((TextView)spItensity.getChildAt(0));
+                if (ch != null) {
+                    ch.setTextColor(Color.parseColor("#2E7D32"));
+                }
+            }
+
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                return;
+            }
+        });
 
         Bundle args = getArguments();
         address = args.getString("Direccion_Bluetooth", address);
-        showToast("Adress: " + address);
+        showToast("Address: " + address);
 
         btnTime.setOnClickListener(new View.OnClickListener()
         {
