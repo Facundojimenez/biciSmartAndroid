@@ -30,8 +30,8 @@ public class TrainningActivity extends AppCompatActivity
     int duracion;
     String intensidad;
     boolean enableBuzzer, enableSensor, enableMusDin, forTime;
-    Button btnRestart;
-
+    static Button btnRestart;
+    static boolean TRAINING_FINISHED;
     Handler bluetoothIn;
     final int handlerState = 0; //used to identify handler message
     private SingletonSocket mSocket;
@@ -56,7 +56,7 @@ public class TrainningActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        TRAINING_FINISHED = false;
         tvDuracion = findViewById(R.id.tv_duracion);
         tvIntensidad = findViewById(R.id.tv_intensidad);
         tvBuzzer = findViewById(R.id.tv_buzzer);
@@ -66,6 +66,7 @@ public class TrainningActivity extends AppCompatActivity
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
         tvEstado = findViewById(R.id.tv_estado);
         btnRestart = findViewById(R.id.btn_restart);
+        btnRestart.setText("Cancelar Entrenamiento");
 
         Bundle bundle =getIntent().getExtras();
         address = bundle.getString("Direccion_Bluethoot");
@@ -91,6 +92,9 @@ public class TrainningActivity extends AppCompatActivity
           {
               Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
               intent.putExtra("Direccion_Bluethoot", address);
+              if (!TRAINING_FINISHED){
+                  mConnectedThread.write("CANCEL");
+              }
               startActivity(intent);
               finish();
           }
@@ -160,13 +164,48 @@ public class TrainningActivity extends AppCompatActivity
                     //voy concatenando el msj
                     String readMessage = (String) msg.obj;
                     recDataString.append(readMessage);
-                    int endOfLineIndex = recDataString.indexOf("\r\n");
+                    int endOfLineIndex = recDataString.indexOf("\n\r");
                     //showToast("Pre mensaje: " + readMessage);
                     //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
                     {
                         String dataInPrint = recDataString.substring(0, endOfLineIndex);
-                        tvEstado.setText(dataInPrint);
+                        switch(dataInPrint){
+                            case "WAITTING":
+                                tvEstado.setText("Entrenamiento listo para comenzar");
+                                break;
+                            case "PAUSED":
+                                tvEstado.setText("Entrenamiento pausado");
+                                break;
+                            case "ENDED":
+                                //las estadisticas al final podrian llegar a pisar este texto
+                                tvEstado.setText("Entrenamiento Finalizado");
+                                btnRestart.setText("Reiniciar");
+                                //si esta en true no se manda CANCEL al arduino al volver al preentrenamiento.
+                                TRAINING_FINISHED = true;
+                                break;
+                            case "STARTED":
+                            case "RESUMED":
+                                //no se si se va a llegar a ver este texto porque los datos del lcd lo pisan
+                                tvEstado.setText("Entrenamiento en Curso");
+                                break;
+                            case "Sad Music":
+                            case "Neutral Music":
+                            case "Motivational Music":
+                            case "NEXT":
+                            case "PLAY":
+                            case "STOP":
+                            default:
+                                //case VOL XX
+                                if(dataInPrint.matches("VOL [0-9]+")){
+                                    int volume = Integer.parseInt(dataInPrint.split(" ")[1]);
+                                    //manejar aca el volumen
+                                }
+                                else {
+                                    tvEstado.setText(dataInPrint);
+                                }
+                                break;
+                        }
                         //showToast("Mensaje: " + dataInPrint);
                         recDataString.delete(0, recDataString.length());
                     }
