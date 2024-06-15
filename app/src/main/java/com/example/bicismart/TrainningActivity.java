@@ -25,7 +25,8 @@ import java.io.OutputStream;
 
 public class TrainningActivity extends AppCompatActivity
 {
-    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento,tvEstado;
+    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento;
+    static TextView tvEstado;
     int duracion;
     String intensidad;
     boolean enableBuzzer, enableSensor, enableMusDin, forTime;
@@ -91,6 +92,7 @@ public class TrainningActivity extends AppCompatActivity
               Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
               intent.putExtra("Direccion_Bluethoot", address);
               startActivity(intent);
+              finish();
           }
         });
 
@@ -159,13 +161,13 @@ public class TrainningActivity extends AppCompatActivity
                     String readMessage = (String) msg.obj;
                     recDataString.append(readMessage);
                     int endOfLineIndex = recDataString.indexOf("\r\n");
-                    showToast("Pre mensaje: " + readMessage);
+                    //showToast("Pre mensaje: " + readMessage);
                     //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
                     {
                         String dataInPrint = recDataString.substring(0, endOfLineIndex);
                         tvEstado.setText(dataInPrint);
-                        showToast("Mensaje: " + dataInPrint);
+                        //showToast("Mensaje: " + dataInPrint);
                         recDataString.delete(0, recDataString.length());
                     }
                 }
