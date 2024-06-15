@@ -84,6 +84,7 @@ public class SingletonSocket
         try
         {
             this.btSocket.close();
+            this.instance = null;
         } catch (IOException e)
         {
 
