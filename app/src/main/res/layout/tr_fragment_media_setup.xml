@@ -10,12 +10,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#D2FBFB"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="20dp">
 
         <TableLayout
             android:id="@+id/tableLayout"
             android:layout_width="match_parent"
-            android:layout_height="578dp"
+            android:layout_height="275dp"
             android:gravity="center_horizontal|center_vertical">
 
             <TableRow
@@ -27,7 +28,8 @@
                     android:id="@+id/textView2"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Cambiar música dinámica" />
+                    android:text="Cambiar música dinámica"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_music"
@@ -45,9 +47,10 @@
 
                 <TextView
                     android:id="@+id/textView3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Controlar entrenamiento con sensores" />
+                    android:layout_width="255dp"
+                    android:layout_height="65dp"
+                    android:text="Controlar entrenamiento con sensores"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_sensor"
@@ -59,15 +62,16 @@
             </TableRow>
 
             <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="323dp"
+                android:layout_height="wrap_content"
                 android:padding="15dp">
 
                 <TextView
                     android:id="@+id/textView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Habilitar buzzer" />
+                    android:layout_width="210dp"
+                    android:layout_height="36dp"
+                    android:text="Habilitar buzzer"
+                    android:textSize="18sp" />
 
                 <Switch
                     android:id="@+id/switch_buzzer"
@@ -82,11 +86,12 @@
 
         <Button
             android:id="@+id/btn_save"
-            android:layout_width="115dp"
+            android:layout_width="152dp"
             android:layout_height="55dp"
             android:layout_gravity="center_horizontal"
             android:text="Guardar"
-            android:textAlignment="center" />
+            android:textAlignment="center"
+            android:textSize="20dp" />
 
     </LinearLayout>
 
