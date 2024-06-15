@@ -164,7 +164,7 @@ public class TrainningActivity extends AppCompatActivity
                     //voy concatenando el msj
                     String readMessage = (String) msg.obj;
                     recDataString.append(readMessage);
-                    int endOfLineIndex = recDataString.indexOf("\n\r");
+                    int endOfLineIndex = recDataString.indexOf("\r\n");
                     //showToast("Pre mensaje: " + readMessage);
                     //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
