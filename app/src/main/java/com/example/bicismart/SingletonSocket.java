@@ -6,6 +6,10 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
+import android.os.Handler;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -14,13 +18,15 @@ public class SingletonSocket
 {
     private static SingletonSocket instance;
     private BluetoothSocket btSocket = null;
-
+    private boolean handleCreated;
+    private Handler bluetoothIn;
     // SPP UUID service  - Funciona en la mayoria de los dispositivos
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     @SuppressLint("MissingPermission")
     private SingletonSocket(String address, BluetoothManager bluetoothManager)
     {
+        handleCreated = false;
         BluetoothAdapter btAdapter;
         if (Build.VERSION.SDK_INT >= 31)
         {
@@ -89,5 +95,25 @@ public class SingletonSocket
         {
 
         }
+    }
+
+    public boolean handleWasCreated()
+    {
+        return this.handleCreated;
+    }
+
+    public void handleCreated()
+    {
+        this.handleCreated = true;
+    }
+
+    public void setHandle(Handler handler)
+    {
+        this.bluetoothIn = handler;
+    }
+
+    public Handler getHandler()
+    {
+        return this.bluetoothIn;
     }
 }

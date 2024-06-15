@@ -98,7 +98,16 @@ public class TrainningActivity extends AppCompatActivity
 
         //defino el Handler de comunicacion entre el hilo Principal  el secundario.
         //El hilo secundario va a mostrar informacion al layout atraves utilizando indeirectamente a este handler
-        bluetoothIn = Handler_Msg_Hilo_Principal();
+        if(!mSocket.handleWasCreated())
+        {
+            bluetoothIn = Handler_Msg_Hilo_Principal();
+            mSocket.setHandle(bluetoothIn);
+            mSocket.handleCreated();
+        }
+        else
+        {
+            bluetoothIn = mSocket.getHandler();
+        }
 
         mConnectedThread = new ConnectedThread(mSocket.getBtSocket());
         mConnectedThread.start();
@@ -150,13 +159,13 @@ public class TrainningActivity extends AppCompatActivity
                     String readMessage = (String) msg.obj;
                     recDataString.append(readMessage);
                     int endOfLineIndex = recDataString.indexOf("\r\n");
-
+                    showToast("Pre mensaje: " + readMessage);
                     //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
                     {
                         String dataInPrint = recDataString.substring(0, endOfLineIndex);
                         tvEstado.setText(dataInPrint);
-
+                        showToast("Mensaje: " + dataInPrint);
                         recDataString.delete(0, recDataString.length());
                     }
                 }
@@ -207,7 +216,6 @@ public class TrainningActivity extends AppCompatActivity
                     //se leen los datos del Bluethoot
                     bytes = mmInStream.read(buffer);
                     String readMessage = new String(buffer, 0, bytes);
-
                     //se muestran en el layout de la activity, utilizando el handler del hilo
                     // principal antes mencionado
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
