@@ -25,7 +25,7 @@ import java.io.OutputStream;
 
 public class TrainningActivity extends AppCompatActivity
 {
-    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento;
+    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento, tvSummaryTiempo, tvSummaryMetrosRecorridos, tvSummaryVelocidadMedia, tvSummaryTitulo;
     static TextView tvEstado;
     int duracion;
     String intensidad;
@@ -65,6 +65,12 @@ public class TrainningActivity extends AppCompatActivity
         tvAddress = findViewById(R.id.tvAddress);
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
         tvEstado = findViewById(R.id.tv_estado);
+
+        tvSummaryTiempo = findViewById(R.id.tvSummaryTiempo);
+        tvSummaryMetrosRecorridos = findViewById(R.id.tvSummaryMetrosRecorridos);
+        tvSummaryVelocidadMedia = findViewById(R.id.tvSummaryVelocidadMedia);
+        tvSummaryTitulo = findViewById(R.id.tvSummaryTitulo);
+
         btnRestart = findViewById(R.id.btn_restart);
         btnRestart.setText("Cancelar Entrenamiento");
 
@@ -169,8 +175,14 @@ public class TrainningActivity extends AppCompatActivity
                     //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
                     {
-                        String dataInPrint = recDataString.substring(0, endOfLineIndex);
-                        switch(dataInPrint){
+                        String commandName = recDataString.substring(0, endOfLineIndex).replaceAll("(\\r)", "");
+                        String commandArguments[] = null;
+                        if(commandName.startsWith("ENDED")){
+                            int commandNameIndex = commandName.indexOf("|");
+                            commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
+                            commandName = commandName.substring(0, commandNameIndex);
+                        }
+                        switch(commandName){
                             case "WAITTING":
                                 tvEstado.setText("Entrenamiento listo para comenzar");
                                 break;
@@ -181,6 +193,13 @@ public class TrainningActivity extends AppCompatActivity
                                 //las estadisticas al final podrian llegar a pisar este texto
                                 tvEstado.setText("Entrenamiento Finalizado");
                                 btnRestart.setText("Reiniciar");
+
+                                tvSummaryTitulo.setText("Resumen del entrenamiento: ");
+                                tvSummaryTiempo.setText(commandArguments[0]);
+                                tvSummaryMetrosRecorridos.setText(commandArguments[1]);
+                                tvSummaryVelocidadMedia.setText(commandArguments[2]);
+
+                                System.out.println(commandArguments);
                                 //si esta en true no se manda CANCEL al arduino al volver al preentrenamiento.
                                 TRAINING_FINISHED = true;
                                 break;
@@ -197,12 +216,12 @@ public class TrainningActivity extends AppCompatActivity
                             case "STOP":
                             default:
                                 //case VOL XX
-                                if(dataInPrint.matches("VOL [0-9]+")){
-                                    int volume = Integer.parseInt(dataInPrint.split(" ")[1]);
+                                if(commandName.matches("VOL [0-9]+")){
+                                    int volume = Integer.parseInt(commandName.split(" ")[1]);
                                     //manejar aca el volumen
                                 }
                                 else {
-                                    tvEstado.setText(dataInPrint);
+                                    tvEstado.setText(commandName);
                                 }
                                 break;
                         }
