@@ -20,6 +20,7 @@ public class MusicService extends Service {
     public void onCreate()
     {
         super.onCreate();
+        this.listRaw();
     }
 
     @Override
@@ -71,6 +72,8 @@ public class MusicService extends Service {
 
     public void playStopMusic()
     {
+        if(reproductor == null)
+            return ;
         if(reproductor.isPlaying())
             reproductor.pause();
         else
@@ -93,6 +96,8 @@ public class MusicService extends Service {
 
     public void startMusic()
     {
+        if(reproductor != null)
+            reproductor.release();
         reproductor = MediaPlayer.create(this, songList.get(0));
         reproductor.setLooping(true);
         reproductor.start();

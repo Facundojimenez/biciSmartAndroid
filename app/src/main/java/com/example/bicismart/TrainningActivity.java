@@ -27,6 +27,7 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import androidx.core.text.util.LocalePreferences;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -45,7 +46,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     //Musica
     static MusicService mService;
     static boolean mBound = false;
-    static boolean firstSong = true;
+    static boolean firstSong;
     //Volumen
     AudioManager audioManager;
     //Sensor proximidad
@@ -78,6 +79,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        firstSong = true;
 
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -198,6 +201,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     {
         super.onStop();
         unbindService(connection);
+        firstSong = true;
         mBound = false;
     }
 
@@ -205,6 +209,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     protected void onDestroy()
     {
         mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
+        firstSong = true;
         super.onDestroy();
     }
 
@@ -298,15 +303,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
     public void playStopMusic()
     {
-        if(mBound && !firstSong)
+        if(mBound)
             mService.playStopMusic();
-        if (firstSong)
-        {
-            mService.listRaw();
-            mService.startMusic();
-            firstSong = false;
-        }
-
     }
 
     private Handler Handler_Msg_Hilo_Principal ()
@@ -377,7 +375,14 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                     mService.nextSong();
                                 break;
                             case "PLAY/STOP":
-                                playStopMusic();
+                                if (firstSong && !enableMusDin)
+                                {
+                                    //mService.listRaw();
+                                    mService.startMusic();
+                                    firstSong = false;
+                                }
+                                else
+                                    playStopMusic();
                                 break;
                             case "VOL":
                                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0 );
