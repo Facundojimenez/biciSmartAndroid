@@ -23,6 +23,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.BiciSmart"
         tools:targetApi="31">
+        <service
+            android:name=".MusicService"
+            android:enabled="true"
+            android:exported="true"></service>
         <activity
             android:name=".TrainningActivity"
             android:exported="false" />

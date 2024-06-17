@@ -2,12 +2,24 @@ package com.example.bicismart;
 
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothSocket;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
+import android.os.Message;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,24 +35,34 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class TrainningActivity extends AppCompatActivity
+public class TrainningActivity extends AppCompatActivity implements SensorEventListener
 {
     TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento, tvSummaryTiempo, tvSummaryMetrosRecorridos, tvSummaryVelocidadMedia, tvSummaryTitulo;
     static TextView tvEstado;
+    //Parametros
     int duracion;
     String intensidad;
     boolean enableBuzzer, enableSensor, enableMusDin, forTime;
+    //Musica
+    static MusicService mService;
+    static boolean mBound = false;
+    //Volumen
+    AudioManager audioManager;
+    //Sensor proximidad
+    private SensorManager mSensorManager;
+    float lastProximitySensor;
+    boolean firstReading = true;
+    //Reiniciar entrenamiento
     static Button btnRestart;
     static boolean TRAINING_FINISHED;
+    //Pausar entrenamiento
+    boolean trainingPaused = false;
+    //Bluetooth
     Handler bluetoothIn;
-    final int handlerState = 0; //used to identify handler message
+    final int handlerState = 0;
     private SingletonSocket mSocket;
-
     private final StringBuilder recDataString = new StringBuilder();
-
     private ConnectedThread mConnectedThread;
-
-    // String for MAC address del Hc05
     private static String address = null;
 
     @SuppressLint({"SetTextI18n", "MissingPermission"})
@@ -56,6 +78,10 @@ public class TrainningActivity extends AppCompatActivity
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
         TRAINING_FINISHED = false;
         tvDuracion = findViewById(R.id.tv_duracion);
         tvIntensidad = findViewById(R.id.tv_intensidad);
@@ -108,8 +134,6 @@ public class TrainningActivity extends AppCompatActivity
 
         mSocket = SingletonSocket.getInstance("", null);
 
-        //defino el Handler de comunicacion entre el hilo Principal  el secundario.
-        //El hilo secundario va a mostrar informacion al layout atraves utilizando indeirectamente a este handler
         if(!mSocket.handleWasCreated())
         {
             bluetoothIn = Handler_Msg_Hilo_Principal();
@@ -126,30 +150,59 @@ public class TrainningActivity extends AppCompatActivity
 
         if(forTime)
         {
-            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0));
+            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + enableBuzzer + " " + enableMusDin);
         }
         else
         {
-            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0));
+            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + enableBuzzer + " " + enableMusDin);
         }
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                //no hacer nada, desactivar back button
             }
         });
     }
 
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+        // Bind to LocalService.
+        Intent intent = new Intent(this, MusicService.class);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY), SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
     @SuppressLint("MissingPermission")
     @Override
-    //Cada vez que se detecta el evento OnResume se establece la comunicacion con el HC05, creando un
-    //socketBluethoot
     protected void onResume()
     {
         super.onResume();
         mConnectedThread = new ConnectedThread(mSocket.getBtSocket());
         mConnectedThread.start();
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY), SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onRestart()
+    {
+        mSensorManager.registerListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY), SensorManager.SENSOR_DELAY_NORMAL);
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        unbindService(connection);
+        mBound = false;
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        mSensorManager.unregisterListener(this, mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
+        super.onDestroy();
     }
 
     private void showToast(String message)
@@ -157,40 +210,130 @@ public class TrainningActivity extends AppCompatActivity
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    //Handler que sirve que permite mostrar datos en el Layout al hilo secundario
+    private final ServiceConnection connection = new ServiceConnection()
+    {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service)
+        {
+            MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+        }
+    };
+
+    @Override
+    public void onSensorChanged(SensorEvent event)
+    {
+        synchronized (this)
+        {
+            switch (event.sensor.getType())
+            {
+                case Sensor.TYPE_PROXIMITY :
+                    if(firstReading)
+                    {
+                        lastProximitySensor = event.values[0];
+                        firstReading = false;
+                    }
+
+                    if(lastProximitySensor != event.values[0])
+                        if(event.values[0] <= 0)
+                        {
+                            if(trainingPaused)
+                            {
+                                mConnectedThread.write("RESUME");
+                                tvEstado.setText("Entrenamiento en Curso");
+                                trainingPaused = false;
+                            }
+                            else
+                            {
+                                mConnectedThread.write("PAUSE");
+                                tvEstado.setText("Entrenamiento Pausado");
+                                trainingPaused = true;
+                            }
+                        }
+
+                    lastProximitySensor = event.values[0];
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+        switch (keyCode)
+        {
+            case KeyEvent.KEYCODE_VOLUME_DOWN:
+            case KeyEvent.KEYCODE_VOLUME_UP: {
+                super.onKeyDown(keyCode, event);
+                int volumeLevel = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+                showToast("Volumen: " + volumeLevel);
+                return super.onKeyDown(keyCode, event);
+            }
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    public void playMusic(String music)
+    {
+        if(mBound)
+            mService.setMusic(music);
+    }
+
+    public void playStopMusic()
+    {
+        if(mBound)
+            mService.playStopMusic();
+    }
+
     private Handler Handler_Msg_Hilo_Principal ()
     {
         return  new Handler(Looper.getMainLooper())
         {
-            public void handleMessage(@NonNull android.os.Message msg)
+            public void handleMessage(@NonNull Message msg)
             {
-                //si se recibio un msj del hilo secundario
                 if (msg.what == handlerState)
                 {
-                    //voy concatenando el msj
                     String readMessage = (String) msg.obj;
                     recDataString.append(readMessage);
                     int endOfLineIndex = recDataString.indexOf("\r\n");
-                    //showToast("Pre mensaje: " + readMessage);
-                    //cuando recibo toda una linea la muestro en el layout
                     if (endOfLineIndex > 0)
                     {
                         String commandName = recDataString.substring(0, endOfLineIndex).replaceAll("(\\r)", "");
-                        String commandArguments[] = null;
-                        if(commandName.startsWith("ENDED")){
+                        String[] commandArguments = null;
+                        int volume = 0;
+                        if(commandName.startsWith("ENDED"))
+                        {
                             int commandNameIndex = commandName.indexOf("|");
                             commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
                             commandName = commandName.substring(0, commandNameIndex);
                         }
-                        switch(commandName){
+                        if(commandName.startsWith("VOL"))
+                        {
+                            int commandNameIndex = commandName.indexOf(" ");
+                            volume = Integer.parseInt(commandName.substring(commandNameIndex + 1));
+                            commandName = commandName.substring(0, commandNameIndex);
+                        }
+                        switch(commandName)
+                        {
                             case "WAITTING":
                                 tvEstado.setText("Entrenamiento listo para comenzar");
                                 break;
                             case "PAUSED":
                                 tvEstado.setText("Entrenamiento pausado");
+                                trainingPaused = true;
                                 break;
                             case "ENDED":
-                                //las estadisticas al final podrian llegar a pisar este texto
                                 tvEstado.setText("Entrenamiento Finalizado");
                                 btnRestart.setText("Reiniciar");
 
@@ -200,49 +343,44 @@ public class TrainningActivity extends AppCompatActivity
                                 tvSummaryVelocidadMedia.setText(commandArguments[2]);
 
                                 System.out.println(commandArguments);
-                                //si esta en true no se manda CANCEL al arduino al volver al preentrenamiento.
                                 TRAINING_FINISHED = true;
                                 break;
                             case "STARTED":
                             case "RESUMED":
-                                //no se si se va a llegar a ver este texto porque los datos del lcd lo pisan
                                 tvEstado.setText("Entrenamiento en Curso");
                                 break;
                             case "Sad Music":
+                                playMusic("Sad");
+                                break;
                             case "Neutral Music":
+                                playMusic("Neutral");
+                                break;
                             case "Motivational Music":
+                                playMusic("Motivational");
+                                break;
                             case "NEXT":
-                            case "PLAY":
-                            case "STOP":
+                            case "PLAY/STOP":
+                                playStopMusic();
+                                break;
+                            case "VOL":
+                                audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0 );
+                                showToast("Volumen: " + volume);
                             default:
-                                //case VOL XX
-                                if(commandName.matches("VOL [0-9]+")){
-                                    int volume = Integer.parseInt(commandName.split(" ")[1]);
-                                    //manejar aca el volumen
-                                }
-                                else {
-                                    tvEstado.setText(commandName);
-                                }
+                                showToast("Comando Erroneo");
                                 break;
                         }
-                        //showToast("Mensaje: " + dataInPrint);
                         recDataString.delete(0, recDataString.length());
                     }
                 }
             }
         };
-
     }
-
-    //******************************************** Hilo secundario del Activity**************************************
-    //*************************************** recibe los datos enviados por el HC05**********************************
 
     private class ConnectedThread extends Thread
     {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
 
-        //Constructor de la clase del hilo secundario
         public ConnectedThread(BluetoothSocket socket)
         {
             InputStream tmpIn = null;
@@ -250,7 +388,6 @@ public class TrainningActivity extends AppCompatActivity
 
             try
             {
-                //Create I/O streams for connection
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e)
@@ -262,22 +399,17 @@ public class TrainningActivity extends AppCompatActivity
             mmOutStream = tmpOut;
         }
 
-        //metodo run del hilo, que va a entrar en una espera activa para recibir los msjs del HC05
         public void run()
         {
             byte[] buffer = new byte[256];
             int bytes;
 
-            //el hilo secundario se queda esperando mensajes del HC05
             while (true)
             {
                 try
                 {
-                    //se leen los datos del Bluethoot
                     bytes = mmInStream.read(buffer);
                     String readMessage = new String(buffer, 0, bytes);
-                    //se muestran en el layout de la activity, utilizando el handler del hilo
-                    // principal antes mencionado
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
                 } catch (IOException e)
                 {
@@ -290,13 +422,12 @@ public class TrainningActivity extends AppCompatActivity
         //write method
         public void write(String input)
         {
-            byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
+            byte[] msgBuffer = input.getBytes();
             try
             {
-                mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
+                mmOutStream.write(msgBuffer);
             } catch (IOException e)
             {
-                //if you cannot write, close the application
                 showToast("La conexion fallo");
                 finish();
             }
