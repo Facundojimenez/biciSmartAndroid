@@ -113,6 +113,8 @@ public class MusicService extends Service {
 
         if(reproductor != null)
             reproductor.release();
+        else
+            return;
 
         reproductor = MediaPlayer.create(this, songList.get(currentSong));
         reproductor.setLooping(true);

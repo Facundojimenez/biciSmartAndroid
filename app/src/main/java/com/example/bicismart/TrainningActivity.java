@@ -42,7 +42,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     //Parametros
     int duracion;
     String intensidad;
-    boolean enableBuzzer, enableSensor, enableMusDin, forTime;
+    boolean enableBuzzer, enableSensor, forTime;
+    static boolean enableMusDin;
     //Musica
     static MusicService mService;
     static boolean mBound = false;
