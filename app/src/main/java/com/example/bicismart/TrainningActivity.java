@@ -19,7 +19,6 @@ import android.os.Message;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +45,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     //Musica
     static MusicService mService;
     static boolean mBound = false;
+    static boolean firstSong = true;
     //Volumen
     AudioManager audioManager;
     //Sensor proximidad
@@ -150,16 +150,18 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
         if(forTime)
         {
-            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + enableBuzzer + " " + enableMusDin);
+            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0));
         }
         else
         {
-            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + enableBuzzer + " " + enableMusDin);
+            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0));
         }
 
-        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true) {
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
+        {
             @Override
-            public void handleOnBackPressed() {
+            public void handleOnBackPressed()
+            {
             }
         });
     }
@@ -192,7 +194,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     }
 
     @Override
-    protected void onStop() {
+    protected void onStop()
+    {
         super.onStop();
         unbindService(connection);
         mBound = false;
@@ -226,6 +229,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         }
     };
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onSensorChanged(SensorEvent event)
     {
@@ -241,22 +245,22 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     }
 
                     if(lastProximitySensor != event.values[0])
-                        if(event.values[0] <= 0)
+                    {
+                        if (event.values[0] <= 0)
                         {
-                            if(trainingPaused)
+                            if (trainingPaused)
                             {
                                 mConnectedThread.write("RESUME");
                                 tvEstado.setText("Entrenamiento en Curso");
                                 trainingPaused = false;
-                            }
-                            else
+                            } else
                             {
                                 mConnectedThread.write("PAUSE");
                                 tvEstado.setText("Entrenamiento Pausado");
                                 trainingPaused = true;
                             }
                         }
-
+                    }
                     lastProximitySensor = event.values[0];
                     break;
             }
@@ -264,7 +268,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+    {
 
     }
 
@@ -274,7 +279,8 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         switch (keyCode)
         {
             case KeyEvent.KEYCODE_VOLUME_DOWN:
-            case KeyEvent.KEYCODE_VOLUME_UP: {
+            case KeyEvent.KEYCODE_VOLUME_UP:
+            {
                 super.onKeyDown(keyCode, event);
                 int volumeLevel = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 showToast("Volumen: " + volumeLevel);
@@ -292,14 +298,22 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
     public void playStopMusic()
     {
-        if(mBound)
+        if(mBound && !firstSong)
             mService.playStopMusic();
+        if (firstSong)
+        {
+            mService.listRaw();
+            mService.startMusic();
+            firstSong = false;
+        }
+
     }
 
     private Handler Handler_Msg_Hilo_Principal ()
     {
         return  new Handler(Looper.getMainLooper())
         {
+            @SuppressLint("SetTextI18n")
             public void handleMessage(@NonNull Message msg)
             {
                 if (msg.what == handlerState)
@@ -359,6 +373,9 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 playMusic("Motivational");
                                 break;
                             case "NEXT":
+                                if(!enableMusDin)
+                                    mService.nextSong();
+                                break;
                             case "PLAY/STOP":
                                 playStopMusic();
                                 break;
