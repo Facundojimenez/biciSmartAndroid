@@ -71,7 +71,7 @@ public class MusicService extends Service {
         }
     }
 
-    public void playStopMusic()
+    public void playPauseMusic()
     {
         if(reproductor == null)
             return ;
@@ -79,6 +79,11 @@ public class MusicService extends Service {
             reproductor.pause();
         else
             reproductor.start();
+    }
+
+    public void stopMusic(){
+        if(reproductor != null)
+            reproductor.stop();
     }
 
     public void listRaw()

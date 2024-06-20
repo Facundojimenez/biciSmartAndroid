@@ -27,7 +27,6 @@ import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
-import androidx.core.text.util.LocalePreferences;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
@@ -305,7 +304,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     public void playStopMusic()
     {
         if(mBound)
-            mService.playStopMusic();
+            mService.playPauseMusic();
     }
 
     private Handler Handler_Msg_Hilo_Principal ()
@@ -349,6 +348,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                             case "ENDED":
                                 tvEstado.setText("Entrenamiento Finalizado");
                                 btnRestart.setText("Reiniciar");
+                                mService.stopMusic();
 
                                 tvSummaryTitulo.setText("Resumen del entrenamiento: ");
                                 tvSummaryTiempo.setText(commandArguments[0]);
