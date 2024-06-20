@@ -57,7 +57,7 @@
                     android:layout_width="292dp"
                     android:layout_height="65dp"
                     android:padding="0dp"
-                    android:text="Controlar entrenamiento con sensores"
+                    android:text="Controlar musica con botones"
                     android:textSize="18sp" />
 
                 <Switch

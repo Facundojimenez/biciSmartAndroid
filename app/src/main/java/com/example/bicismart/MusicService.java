@@ -27,7 +27,8 @@ public class MusicService extends Service {
     public void onDestroy()
     {
         Toast.makeText(this,"Servicio detenido",Toast.LENGTH_SHORT).show();
-        reproductor.stop();
+        if(reproductor != null)
+            reproductor.stop();
     }
 
     public class LocalBinder extends Binder
