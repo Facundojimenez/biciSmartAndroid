@@ -323,12 +323,14 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     {
                         String commandName = recDataString.substring(0, endOfLineIndex).replaceAll("(\\r)", "");
                         String[] commandArguments = null;
+                        String resumen = "";
                         int volume = 0;
                         if(commandName.startsWith("ENDED"))
                         {
                             int commandNameIndex = commandName.indexOf("|");
-                            commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
-                            commandName = commandName.substring(0, commandNameIndex);
+//                            commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
+//                            commandName = commandName.substring(0, commandNameIndex);
+                            resumen = commandName.substring(commandNameIndex+1);
                         }
                         if(commandName.startsWith("VOL"))
                         {
@@ -346,16 +348,17 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 trainingPaused = true;
                                 break;
                             case "ENDED":
-                                tvEstado.setText("Entrenamiento Finalizado");
+                                //tvEstado.setText("Entrenamiento Finalizado\n" + resumen);
+                                tvEstado.setText(resumen);
                                 btnRestart.setText("Reiniciar");
                                 mService.stopMusic();
 
-                                tvSummaryTitulo.setText("Resumen del entrenamiento: ");
-                                tvSummaryTiempo.setText(commandArguments[0]);
-                                tvSummaryMetrosRecorridos.setText(commandArguments[1]);
-                                tvSummaryVelocidadMedia.setText(commandArguments[2]);
+//                                tvSummaryTitulo.setText("Resumen del entrenamiento: ");
+//                                tvSummaryTiempo.setText(commandArguments[0]);
+//                                tvSummaryMetrosRecorridos.setText(commandArguments[1]);
+//                                tvSummaryVelocidadMedia.setText(commandArguments[2]);
 
-                                System.out.println(commandArguments);
+//                                System.out.println(commandArguments);
                                 TRAINING_FINISHED = true;
                                 break;
                             case "STARTED":
