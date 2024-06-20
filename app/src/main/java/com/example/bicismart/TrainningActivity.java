@@ -154,11 +154,11 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
         if(forTime)
         {
-            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
         else
         {
-            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
