@@ -17,7 +17,7 @@ import android.widget.Toast;
 public class MediaSetupFragment extends Fragment
 {
     @SuppressLint("UseSwitchCompatOrMaterialCode")
-    Switch swMusic, swSensor, swBuzzer;
+    Switch swMusic, swBuzzer;
     Button btnSave;
 
     public MediaSetupFragment()
@@ -37,7 +37,7 @@ public class MediaSetupFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
         swMusic = view.findViewById(R.id.switch_music);
-        swSensor = view.findViewById(R.id.switch_sensor);
+        //swSensor = view.findViewById(R.id.switch_sensor);
         swBuzzer = view.findViewById(R.id.switch_buzzer);
         btnSave = view.findViewById(R.id.btn_save);
 
@@ -52,15 +52,15 @@ public class MediaSetupFragment extends Fragment
             }
         });
 
-        swSensor.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if(swSensor.isChecked())
-                    showToast("Control por Sensores Activado");
-            }
-        });
+//        swSensor.setOnClickListener(new View.OnClickListener()
+//        {
+//            @Override
+//            public void onClick(View v)
+//            {
+//                if(swSensor.isChecked())
+//                    showToast("Control por Sensores Activado");
+//            }
+//        });
 
         swBuzzer.setOnClickListener(new View.OnClickListener()
         {
@@ -81,7 +81,7 @@ public class MediaSetupFragment extends Fragment
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("Musica_Dinamica", swMusic.isChecked());
                 bundle.putBoolean("Buzzer", swBuzzer.isChecked());
-                bundle.putBoolean("Control_Sensors", swSensor.isChecked());
+              //  bundle.putBoolean("Control_Sensors", swSensor.isChecked());
                 getParentFragmentManager().setFragmentResult("datos", bundle);
             }
         });

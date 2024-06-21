@@ -40,12 +40,6 @@
         android:text="Buzzer" />
 
     <TextView
-        android:id="@+id/tv_Sensores"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Sensores" />
-
-    <TextView
         android:id="@+id/tv_MusicaDin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

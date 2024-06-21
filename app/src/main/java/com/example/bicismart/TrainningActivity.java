@@ -36,12 +36,12 @@ import java.io.OutputStream;
 
 public class TrainningActivity extends AppCompatActivity implements SensorEventListener
 {
-    TextView tvDuracion, tvIntensidad, tvBuzzer, tvSensores, tvMusDin, tvAddress, tvTipoEntrenamiento, tvSummaryTiempo, tvSummaryMetrosRecorridos, tvSummaryVelocidadMedia, tvSummaryTitulo;
+    TextView tvDuracion, tvIntensidad, tvBuzzer,  tvMusDin, tvAddress, tvTipoEntrenamiento, tvSummaryTiempo, tvSummaryMetrosRecorridos, tvSummaryVelocidadMedia, tvSummaryTitulo;
     static TextView tvEstado;
     //Parametros
     int duracion;
     String intensidad;
-    boolean enableBuzzer, enableSensor, forTime;
+    boolean enableBuzzer, forTime;
     static boolean enableMusDin;
     //Musica
     static MusicService mService;
@@ -89,7 +89,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         tvDuracion = findViewById(R.id.tv_duracion);
         tvIntensidad = findViewById(R.id.tv_intensidad);
         tvBuzzer = findViewById(R.id.tv_buzzer);
-        tvSensores = findViewById(R.id.tv_Sensores);
+        //tvSensores = findViewById(R.id.tv_Sensores);
         tvMusDin = findViewById(R.id.tv_MusicaDin);
         tvAddress = findViewById(R.id.tvAddress);
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
@@ -108,7 +108,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         duracion = bundle.getInt("Duracion");
         intensidad = bundle.getString("Intensidad");
         enableBuzzer = bundle.getBoolean("Buzzer");
-        enableSensor = bundle.getBoolean("Sensores");
+
         enableMusDin = bundle.getBoolean("Musica Dinamica");
         forTime = bundle.getBoolean("Por Tiempo");
 
@@ -116,7 +116,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         tvDuracion.setText("Duracion: " + duracion);
         tvIntensidad.setText("Intensidad: " + intensidad);
         tvBuzzer.setText("Buzzer: " + enableBuzzer);
-        tvSensores.setText("Sensores: " + enableSensor);
+
         tvMusDin.setText("Musica Dinamica: " + enableMusDin);
         tvAddress.setText("Address: " + address);
 
@@ -154,11 +154,11 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
         if(forTime)
         {
-            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            mConnectedThread.write(duracion + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
         else
         {
-            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (enableMusDin?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
@@ -357,12 +357,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 btnRestart.setText("Reiniciar");
                                 mService.stopMusic();
 
-//                                tvSummaryTitulo.setText("Resumen del entrenamiento: ");
-//                                tvSummaryTiempo.setText(commandArguments[0]);
-//                                tvSummaryMetrosRecorridos.setText(commandArguments[1]);
-//                                tvSummaryVelocidadMedia.setText(commandArguments[2]);
-
-//                                System.out.println(commandArguments);
                                 TRAINING_FINISHED = true;
                                 break;
                             case "STARTED":

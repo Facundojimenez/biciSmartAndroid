@@ -41,7 +41,7 @@ public class TrainingSetupFragment extends Fragment
     private static String address = null;
 
     private boolean enableBuzzer = true;
-    private boolean enableSensor = true;
+    //private boolean enableSensor = true;
     private boolean enableDinMusic = true;
 
     public TrainingSetupFragment()
@@ -73,7 +73,7 @@ public class TrainingSetupFragment extends Fragment
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result)
             {
                 enableBuzzer = result.getBoolean("Buzzer");
-                enableSensor = result.getBoolean("Control_Sensors");
+
                 enableDinMusic = result.getBoolean("Musica_Dinamica");
             }
         });
@@ -146,20 +146,13 @@ public class TrainingSetupFragment extends Fragment
                     showToast("Ingresar Parametros");
                 else
                 {
-                    showToast("Parametros: Duracion(Metros o Minutos): " + str +
-                            "\nIntensidad: " + spItensity.getSelectedItem().toString() +
-                            "\nBuzzer: " + enableBuzzer +
-                            "\nSensores: " + enableSensor +
-                            "\nMusica Dinamica: " + enableDinMusic +
-                            "\nPor Tiempo: " + btnTime.isChecked());
-
                     Intent i = new Intent(getActivity(), TrainningActivity.class);
                     i.putExtra("Direccion_Bluethoot", address);
                     i.putExtra("Duracion", Integer.parseInt(str));
                     i.putExtra("Por Tiempo", btnTime.isChecked());
                     i.putExtra("Intensidad", spItensity.getSelectedItem().toString());
                     i.putExtra("Buzzer", enableBuzzer);
-                    i.putExtra("Sensores", enableSensor);
+
                     i.putExtra("Musica Dinamica", enableDinMusic);
                     startActivity(i);
                 }
