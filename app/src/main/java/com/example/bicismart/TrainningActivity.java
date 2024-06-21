@@ -129,6 +129,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
               intent.putExtra("Direccion_Bluethoot", address);
               if (!TRAINING_FINISHED){
                   mConnectedThread.write("CANCEL");
+                  return;
               }
               startActivity(intent);
               finish();
@@ -258,11 +259,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 mConnectedThread.write("RESUME");
                                 tvEstado.setText("Entrenamiento en Curso");
                                 trainingPaused = false;
+                                playPauseMusic();
                             } else
                             {
                                 mConnectedThread.write("PAUSE");
                                 tvEstado.setText("Entrenamiento Pausado");
                                 trainingPaused = true;
+                                playPauseMusic();
                             }
                         }
                     }
@@ -301,7 +304,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
             mService.setMusic(music);
     }
 
-    public void playStopMusic()
+    public void playPauseMusic()
     {
         if(mBound)
             mService.playPauseMusic();
@@ -331,6 +334,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 //                            commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
 //                            commandName = commandName.substring(0, commandNameIndex);
                             resumen = commandName.substring(commandNameIndex+1);
+                            commandName = commandName.substring(0,commandNameIndex);
                         }
                         if(commandName.startsWith("VOL"))
                         {
@@ -386,7 +390,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                     firstSong = false;
                                 }
                                 else
-                                    playStopMusic();
+                                    playPauseMusic();
                                 break;
                             case "VOL":
                                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0 );
